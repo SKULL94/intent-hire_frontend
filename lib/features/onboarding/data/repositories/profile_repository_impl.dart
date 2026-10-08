@@ -13,10 +13,19 @@ class ProfileRepositoryImpl implements ProfileRepository {
   ProfileRepositoryImpl(this._remote);
 
   @override
-  Future<Either<Failure, void>> saveProfile(UserProfile profile) async {
+  Future<Either<Failure, void>> saveProfile(UserProfile profile) => _guard(
+        () async {
+          await _remote.saveProfile(UserProfileModel.fromEntity(profile));
+        },
+      );
+
+  @override
+  Future<Either<Failure, UserProfile>> getProfile() =>
+      _guard(() async => (await _remote.getProfile()).toEntity());
+
+  Future<Either<Failure, T>> _guard<T>(Future<T> Function() run) async {
     try {
-      await _remote.saveProfile(UserProfileModel.fromEntity(profile));
-      return const Right(null);
+      return Right(await run());
     } on app_errors.AuthException catch (e) {
       return Left(AuthFailure(e.message));
     } on app_errors.NetworkException catch (e) {

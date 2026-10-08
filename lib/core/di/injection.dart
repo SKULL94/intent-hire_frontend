@@ -17,11 +17,25 @@ import '../../features/auth/domain/usecases/sign_up_with_email.dart';
 import '../../features/auth/domain/usecases/verify_phone_otp.dart';
 import '../../features/auth/domain/usecases/watch_auth_state.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/company_detail/data/datasources/company_remote_datasource.dart';
+import '../../features/company_detail/data/repositories/company_repository_impl.dart';
+import '../../features/company_detail/domain/repositories/company_repository.dart';
+import '../../features/company_detail/domain/usecases/get_company_detail.dart';
+import '../../features/company_detail/presentation/bloc/company_detail_bloc.dart';
+import '../../features/matches/data/datasources/matches_remote_datasource.dart';
+import '../../features/matches/data/repositories/matches_repository_impl.dart';
+import '../../features/matches/domain/repositories/matches_repository.dart';
+import '../../features/matches/domain/usecases/get_matches.dart';
+import '../../features/matches/domain/usecases/refresh_matches.dart';
+import '../../features/matches/domain/usecases/update_match_status.dart';
+import '../../features/matches/presentation/bloc/matches_bloc.dart';
 import '../../features/onboarding/data/datasources/profile_remote_datasource.dart';
 import '../../features/onboarding/data/repositories/profile_repository_impl.dart';
 import '../../features/onboarding/domain/repositories/profile_repository.dart';
+import '../../features/onboarding/domain/usecases/get_profile.dart';
 import '../../features/onboarding/domain/usecases/save_profile.dart';
 import '../../features/onboarding/presentation/bloc/onboarding_bloc.dart';
+import '../../features/profile/presentation/bloc/profile_bloc.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -30,6 +44,9 @@ Future<void> configureDependencies() async {
   _registerCore();
   _registerAuth();
   _registerOnboarding();
+  _registerMatches();
+  _registerCompanyDetail();
+  _registerProfile();
 }
 
 void _registerExternal() {
@@ -83,7 +100,50 @@ void _registerOnboarding() {
       () => ProfileRepositoryImpl(getIt()),
     )
     ..registerLazySingleton<SaveProfile>(() => SaveProfile(getIt()))
+    ..registerLazySingleton<GetProfile>(() => GetProfile(getIt()))
     ..registerFactory<OnboardingBloc>(
       () => OnboardingBloc(saveProfile: getIt()),
     );
+}
+
+void _registerMatches() {
+  getIt
+    ..registerLazySingleton<MatchesRemoteDataSource>(
+      () => MatchesRemoteDataSource(getIt()),
+    )
+    ..registerLazySingleton<MatchesRepository>(
+      () => MatchesRepositoryImpl(getIt()),
+    )
+    ..registerLazySingleton<GetMatches>(() => GetMatches(getIt()))
+    ..registerLazySingleton<RefreshMatches>(() => RefreshMatches(getIt()))
+    ..registerLazySingleton<UpdateMatchStatus>(() => UpdateMatchStatus(getIt()))
+    ..registerFactory<MatchesBloc>(
+      () => MatchesBloc(
+        getMatches: getIt(),
+        refreshMatches: getIt(),
+        updateStatus: getIt(),
+      ),
+    );
+}
+
+void _registerCompanyDetail() {
+  getIt
+    ..registerLazySingleton<CompanyRemoteDataSource>(
+      () => CompanyRemoteDataSource(getIt()),
+    )
+    ..registerLazySingleton<CompanyRepository>(
+      () => CompanyRepositoryImpl(getIt()),
+    )
+    ..registerLazySingleton<GetCompanyDetail>(() => GetCompanyDetail(getIt()))
+    ..registerFactory<CompanyDetailBloc>(
+      () => CompanyDetailBloc(getCompanyDetail: getIt()),
+    );
+}
+
+void _registerProfile() {
+  // Registered as a factory; AppRouter holds the single instance that the
+  // authenticated routes share.
+  getIt.registerFactory<ProfileBloc>(
+    () => ProfileBloc(getProfile: getIt(), saveProfile: getIt()),
+  );
 }

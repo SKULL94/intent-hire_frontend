@@ -4,6 +4,7 @@ class ApiEndpoints {
   static const String health = '/health';
 
   static const String usersProfile = '/api/v1/users/profile';
+  static const String usersMe = '/api/v1/users/me';
 
   static const String companies = '/api/v1/companies';
   static String companyById(String id) => '/api/v1/companies/$id';

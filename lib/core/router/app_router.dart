@@ -1,20 +1,35 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../di/injection.dart';
 import '../widgets/home_shell.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/signup_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
+import '../../features/company_detail/presentation/bloc/company_detail_bloc.dart';
+import '../../features/company_detail/presentation/pages/company_detail_page.dart';
+import '../../features/matches/presentation/bloc/matches_bloc.dart';
+import '../../features/matches/presentation/pages/matches_page.dart';
 import '../../features/onboarding/presentation/pages/skill_setup_page.dart';
+import '../../features/profile/presentation/bloc/profile_bloc.dart';
+import '../../features/profile/presentation/pages/edit_skills_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
 import 'route_paths.dart';
 
 class AppRouter {
   final SupabaseClient _supabase;
 
   AppRouter(this._supabase);
+
+  /// `ProfileBloc` is created once and shared across the authenticated routes:
+  /// the profile tab edits it, and the matches list reads the user's skills
+  /// from it to highlight overlapping technologies.
+  late final ProfileBloc _profileBloc = getIt<ProfileBloc>()
+    ..add(const ProfileRequested());
 
   late final GoRouter router = GoRouter(
     initialLocation: RoutePaths.splash,
@@ -38,17 +53,49 @@ class AppRouter {
         builder: (_, __) => const SkillSetupPage(),
       ),
       ShellRoute(
-        builder: (_, __, child) => HomeShell(child: child),
+        builder: (_, __, child) => BlocProvider<ProfileBloc>.value(
+          value: _profileBloc,
+          child: HomeShell(child: child),
+        ),
         routes: [
           GoRoute(
             path: RoutePaths.matches,
-            builder: (_, __) => const _PlaceholderPage(title: 'Matches'),
+            builder: (_, __) => BlocProvider<MatchesBloc>(
+              create: (_) =>
+                  getIt<MatchesBloc>()..add(const MatchesRequested()),
+              child: const MatchesPage(),
+            ),
           ),
           GoRoute(
             path: RoutePaths.profile,
-            builder: (_, __) => const _PlaceholderPage(title: 'Profile'),
+            builder: (_, __) => const ProfilePage(),
           ),
         ],
+      ),
+      // Pushed over the shell, so these keep their own Scaffold and back button
+      // but still need ProfileBloc for the user's skills.
+      GoRoute(
+        path: RoutePaths.editSkills,
+        builder: (_, __) => BlocProvider<ProfileBloc>.value(
+          value: _profileBloc,
+          child: const EditSkillsPage(),
+        ),
+      ),
+      GoRoute(
+        path: '${RoutePaths.company}/:id',
+        builder: (_, state) {
+          final id = state.pathParameters['id']!;
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider<ProfileBloc>.value(value: _profileBloc),
+              BlocProvider<CompanyDetailBloc>(
+                create: (_) => getIt<CompanyDetailBloc>()
+                  ..add(CompanyDetailRequested(id)),
+              ),
+            ],
+            child: CompanyDetailPage(companyId: id),
+          );
+        },
       ),
     ],
   );
@@ -83,16 +130,4 @@ class _AuthRefresh extends ChangeNotifier {
     _sub.cancel();
     super.dispose();
   }
-}
-
-// Temporary placeholder until Week 6/7 matches and profile features land.
-class _PlaceholderPage extends StatelessWidget {
-  final String title;
-  const _PlaceholderPage({required this.title});
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text(title)),
-        body: Center(child: Text('$title — coming in Week 6/7')),
-      );
 }

@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/error/exceptions.dart' as app_errors;
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../models/user_profile_model.dart';
@@ -9,6 +10,16 @@ class ProfileRemoteDataSource {
   final SupabaseClient _supabase;
 
   ProfileRemoteDataSource(this._api, this._supabase);
+
+  /// Reads the signed-in user's stored profile. Throws `ServerException` with
+  /// status 404 when they have not completed onboarding yet.
+  Future<UserProfileModel> getProfile() async {
+    final data = await _api.get(ApiEndpoints.usersMe);
+    if (data is! Map<String, dynamic>) {
+      throw const app_errors.ServerException('Unexpected profile response');
+    }
+    return UserProfileModel.fromJson(data);
+  }
 
   Future<void> saveProfile(UserProfileModel profile) {
     // Backend `upsert_profile` requires `email` on first-time creation of a
