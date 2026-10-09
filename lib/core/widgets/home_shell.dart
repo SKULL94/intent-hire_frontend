@@ -8,7 +8,8 @@ class HomeShell extends StatelessWidget {
   const HomeShell({super.key, required this.child});
 
   int _indexFromLocation(String location) {
-    if (location.startsWith(RoutePaths.profile)) return 1;
+    if (location.startsWith(RoutePaths.jobs)) return 1;
+    if (location.startsWith(RoutePaths.profile)) return 2;
     return 0;
   }
 
@@ -17,6 +18,8 @@ class HomeShell extends StatelessWidget {
       case 0:
         context.go(RoutePaths.matches);
       case 1:
+        context.go(RoutePaths.jobs);
+      case 2:
         context.go(RoutePaths.profile);
     }
   }
@@ -35,6 +38,11 @@ class HomeShell extends StatelessWidget {
             icon: Icon(Icons.inbox_outlined),
             selectedIcon: Icon(Icons.inbox),
             label: 'Matches',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.work_outline),
+            selectedIcon: Icon(Icons.work),
+            label: 'Jobs',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),

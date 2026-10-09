@@ -1,6 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../network/api_client.dart';
@@ -22,6 +23,13 @@ import '../../features/company_detail/data/repositories/company_repository_impl.
 import '../../features/company_detail/domain/repositories/company_repository.dart';
 import '../../features/company_detail/domain/usecases/get_company_detail.dart';
 import '../../features/company_detail/presentation/bloc/company_detail_bloc.dart';
+import '../../features/jobs/data/datasources/job_filter_store.dart';
+import '../../features/jobs/data/datasources/jobs_remote_datasource.dart';
+import '../../features/jobs/data/repositories/jobs_repository_impl.dart';
+import '../../features/jobs/domain/repositories/jobs_repository.dart';
+import '../../features/jobs/domain/usecases/get_jobs.dart';
+import '../../features/jobs/presentation/bloc/jobs_bloc.dart';
+import '../../features/matches/data/datasources/match_filter_store.dart';
 import '../../features/matches/data/datasources/matches_remote_datasource.dart';
 import '../../features/matches/data/repositories/matches_repository_impl.dart';
 import '../../features/matches/domain/repositories/matches_repository.dart';
@@ -40,20 +48,27 @@ import '../../features/profile/presentation/bloc/profile_bloc.dart';
 final GetIt getIt = GetIt.instance;
 
 Future<void> configureDependencies() async {
-  _registerExternal();
+  await _registerExternal();
   _registerCore();
   _registerAuth();
   _registerOnboarding();
   _registerMatches();
+  _registerJobs();
   _registerCompanyDetail();
   _registerProfile();
 }
 
-void _registerExternal() {
+Future<void> _registerExternal() async {
   getIt
     ..registerLazySingleton<http.Client>(http.Client.new)
     ..registerLazySingleton<SupabaseClient>(() => Supabase.instance.client)
     ..registerLazySingleton<Connectivity>(Connectivity.new);
+
+  // Resolved eagerly so everything downstream can read preferences
+  // synchronously — a bloc constructor cannot await.
+  getIt.registerSingleton<SharedPreferences>(
+    await SharedPreferences.getInstance(),
+  );
 }
 
 void _registerCore() {
@@ -111,6 +126,7 @@ void _registerMatches() {
     ..registerLazySingleton<MatchesRemoteDataSource>(
       () => MatchesRemoteDataSource(getIt()),
     )
+    ..registerLazySingleton<MatchFilterStore>(() => MatchFilterStore(getIt()))
     ..registerLazySingleton<MatchesRepository>(
       () => MatchesRepositoryImpl(getIt()),
     )
@@ -122,7 +138,21 @@ void _registerMatches() {
         getMatches: getIt(),
         refreshMatches: getIt(),
         updateStatus: getIt(),
+        filterStore: getIt(),
       ),
+    );
+}
+
+void _registerJobs() {
+  getIt
+    ..registerLazySingleton<JobsRemoteDataSource>(
+      () => JobsRemoteDataSource(getIt()),
+    )
+    ..registerLazySingleton<JobFilterStore>(() => JobFilterStore(getIt()))
+    ..registerLazySingleton<JobsRepository>(() => JobsRepositoryImpl(getIt()))
+    ..registerLazySingleton<GetJobs>(() => GetJobs(getIt()))
+    ..registerFactory<JobsBloc>(
+      () => JobsBloc(getJobs: getIt(), filterStore: getIt()),
     );
 }
 

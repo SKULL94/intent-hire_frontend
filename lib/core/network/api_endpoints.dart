@@ -10,6 +10,12 @@ class ApiEndpoints {
   static String companyById(String id) => '/api/v1/companies/$id';
   static String companySignals(String id) => '/api/v1/companies/$id/signals';
 
+  // Job-level search. Unlike /matches this is not per-user: it filters
+  // postings directly, which is the only way to ask about one technology in
+  // one city.
+  static const String jobs = '/api/v1/jobs';
+  static const String jobFacets = '/api/v1/jobs/facets';
+
   static const String matches = '/api/v1/matches';
   static const String matchesRefresh = '/api/v1/matches/refresh';
   // PATCH only — backend has no GET for a single match.

@@ -20,15 +20,30 @@ class ApiClient {
       if (json) 'Content-Type': 'application/json',
       'Accept': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
+      // Free ngrok tunnels answer browser-like clients with an HTML interstitial
+      // instead of the API response; this opts out. No-op off a tunnel.
+      'ngrok-skip-browser-warning': '1',
     };
   }
 
   Uri _uri(String path, [Map<String, dynamic>? query]) {
     final base = Uri.parse('${AppConstants.apiBaseUrl}$path');
     if (query == null || query.isEmpty) return base;
-    return base.replace(
-      queryParameters: query.map((k, v) => MapEntry(k, '$v')),
-    );
+    // An Iterable value becomes a repeated parameter (`?tech=flutter&tech=dart`),
+    // which is how FastAPI receives a `list[str]` query argument. Stringifying
+    // it instead would send the literal "[flutter, dart]".
+    final normalized = <String, dynamic>{};
+    query.forEach((key, value) {
+      if (value == null) return;
+      if (value is Iterable) {
+        final items = value.map((v) => '$v').toList();
+        if (items.isNotEmpty) normalized[key] = items;
+      } else {
+        normalized[key] = '$value';
+      }
+    });
+    if (normalized.isEmpty) return base;
+    return base.replace(queryParameters: normalized);
   }
 
   Future<dynamic> get(String path, {Map<String, dynamic>? query}) =>

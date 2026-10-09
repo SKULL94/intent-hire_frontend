@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/usecase/usecase.dart';
+import '../../data/datasources/match_filter_store.dart';
 import '../../domain/entities/match.dart';
 import '../../domain/repositories/matches_repository.dart';
 import '../../domain/usecases/get_matches.dart';
@@ -15,14 +16,17 @@ class MatchesBloc extends Bloc<MatchesEvent, MatchesStateData> {
   final GetMatches _getMatches;
   final RefreshMatches _refreshMatches;
   final UpdateMatchStatus _updateStatus;
+  final MatchFilterStore _filterStore;
 
   MatchesBloc({
     required GetMatches getMatches,
     required RefreshMatches refreshMatches,
     required UpdateMatchStatus updateStatus,
+    required MatchFilterStore filterStore,
   })  : _getMatches = getMatches,
         _refreshMatches = refreshMatches,
         _updateStatus = updateStatus,
+        _filterStore = filterStore,
         super(const MatchesStateData.initial()) {
     on<MatchesRequested>(_onRequested);
     on<MatchesRefreshRequested>(_onRefresh);
@@ -46,12 +50,20 @@ class MatchesBloc extends Bloc<MatchesEvent, MatchesStateData> {
     );
   }
 
+  /// Initial load. The filter comes from local storage rather than
+  /// `state.filter`, so the sliders the user last applied survive a restart
+  /// instead of silently reverting to "show everything".
   Future<void> _onRequested(
     MatchesRequested event,
     Emitter<MatchesStateData> emit,
   ) async {
-    emit(state.copyWith(status: MatchesStatus.loading, clearError: true));
-    await _load(emit, state.filter);
+    final filter = _filterStore.read();
+    emit(state.copyWith(
+      status: MatchesStatus.loading,
+      filter: filter,
+      clearError: true,
+    ));
+    await _load(emit, filter);
   }
 
   /// Pull-to-refresh. `POST /matches/refresh` returns 202 and recomputes in the
@@ -76,6 +88,9 @@ class MatchesBloc extends Bloc<MatchesEvent, MatchesStateData> {
     Emitter<MatchesStateData> emit,
   ) async {
     emit(state.copyWith(status: MatchesStatus.loading, filter: event.filter));
+    // Persist before fetching: the user's choice should stick even if the
+    // request that follows it fails.
+    await _filterStore.write(event.filter);
     await _load(emit, event.filter);
   }
 

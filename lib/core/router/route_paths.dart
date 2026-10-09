@@ -7,6 +7,7 @@ class RoutePaths {
   static const String skillSetup = '/onboarding/skills';
 
   static const String matches = '/matches';
+  static const String jobs = '/jobs';
   static const String profile = '/profile';
   static const String editSkills = '/profile/edit-skills';
 

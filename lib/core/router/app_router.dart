@@ -12,6 +12,8 @@ import '../../features/auth/presentation/pages/signup_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
 import '../../features/company_detail/presentation/bloc/company_detail_bloc.dart';
 import '../../features/company_detail/presentation/pages/company_detail_page.dart';
+import '../../features/jobs/presentation/bloc/jobs_bloc.dart';
+import '../../features/jobs/presentation/pages/jobs_page.dart';
 import '../../features/matches/presentation/bloc/matches_bloc.dart';
 import '../../features/matches/presentation/pages/matches_page.dart';
 import '../../features/onboarding/presentation/pages/skill_setup_page.dart';
@@ -64,6 +66,13 @@ class AppRouter {
               create: (_) =>
                   getIt<MatchesBloc>()..add(const MatchesRequested()),
               child: const MatchesPage(),
+            ),
+          ),
+          GoRoute(
+            path: RoutePaths.jobs,
+            builder: (_, __) => BlocProvider<JobsBloc>(
+              create: (_) => getIt<JobsBloc>()..add(const JobsRequested()),
+              child: const JobsPage(),
             ),
           ),
           GoRoute(
