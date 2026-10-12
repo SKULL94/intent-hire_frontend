@@ -29,6 +29,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileStateData> {
     on<ProfileSkillToggled>(_onSkillToggled);
     on<ProfileSkillProficiencyChanged>(_onProficiency);
     on<ProfileExperienceChanged>(_onExperience);
+    on<ProfileBioChanged>(_onBioChanged);
     on<ProfileSaved>(_onSaved);
   }
 
@@ -82,6 +83,24 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileStateData> {
   ) {
     emit(state.copyWith(
       profile: state.profile.copyWith(experienceYears: event.years),
+    ));
+  }
+
+  void _onBioChanged(
+    ProfileBioChanged event,
+    Emitter<ProfileStateData> emit,
+  ) {
+    emit(state.copyWith(
+      profile: state.profile.copyWith(
+        phone: event.phone,
+        linkedinUrl: event.linkedinUrl,
+        githubUrl: event.githubUrl,
+        portfolioUrl: event.portfolioUrl,
+        locationText: event.locationText,
+        currentEmployer: event.currentEmployer,
+        highlights: event.highlights,
+        experienceLabel: event.experienceLabel,
+      ),
     ));
   }
 

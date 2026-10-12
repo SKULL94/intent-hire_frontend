@@ -27,7 +27,7 @@ class SkillCategory extends Equatable {
 const List<SkillCategory> kSkillCatalog = [
   SkillCategory(
     name: 'Mobile',
-    suggestions: ['flutter', 'dart', 'kotlin', 'swift', 'react-native'],
+    suggestions: ['flutter', 'kotlin', 'swift', 'react-native'],
   ),
   SkillCategory(
     name: 'Backend',

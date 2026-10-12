@@ -12,12 +12,14 @@ class JobCard extends StatelessWidget {
   final Set<String> userSkills;
 
   final VoidCallback? onTap;
+  final VoidCallback? onEmailTap;
 
   const JobCard({
     super.key,
     required this.job,
     this.userSkills = const {},
     this.onTap,
+    this.onEmailTap,
   });
 
   /// Technologies the user already has come first — those are the reason this
@@ -120,6 +122,18 @@ class JobCard extends StatelessWidget {
                   ],
                 ),
               ],
+              if (onEmailTap != null)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: onEmailTap,
+                    icon: const Icon(Icons.email_outlined, size: 16),
+                    label: const Text('Cold email'),
+                    style: TextButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

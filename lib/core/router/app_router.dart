@@ -18,6 +18,7 @@ import '../../features/matches/presentation/bloc/matches_bloc.dart';
 import '../../features/matches/presentation/pages/matches_page.dart';
 import '../../features/onboarding/presentation/pages/skill_setup_page.dart';
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
+import '../../features/profile/presentation/pages/edit_bio_page.dart';
 import '../../features/profile/presentation/pages/edit_skills_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import 'route_paths.dart';
@@ -88,6 +89,13 @@ class AppRouter {
         builder: (_, __) => BlocProvider<ProfileBloc>.value(
           value: _profileBloc,
           child: const EditSkillsPage(),
+        ),
+      ),
+      GoRoute(
+        path: RoutePaths.editBio,
+        builder: (_, __) => BlocProvider<ProfileBloc>.value(
+          value: _profileBloc,
+          child: const EditBioPage(),
         ),
       ),
       GoRoute(

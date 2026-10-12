@@ -10,8 +10,8 @@ class MatchFilter {
 
   const MatchFilter({
     this.minScore = 0,
-    this.minTechFit = 0,
-    this.limit = 20,
+    this.minTechFit = 0.20,
+    this.limit = 50,
   });
 
   MatchFilter copyWith({double? minScore, double? minTechFit, int? limit}) =>
@@ -21,7 +21,7 @@ class MatchFilter {
         limit: limit ?? this.limit,
       );
 
-  bool get isDefault => minScore == 0 && minTechFit == 0;
+  bool get isDefault => minScore == 0 && minTechFit == 0.20;
 }
 
 abstract class MatchesRepository {

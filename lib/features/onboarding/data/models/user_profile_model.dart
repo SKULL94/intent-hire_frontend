@@ -7,6 +7,14 @@ class UserProfileModel {
   final int experienceYears;
   final List<String> preferredLocations;
   final int? minSalary;
+  final String? phone;
+  final String? linkedinUrl;
+  final String? githubUrl;
+  final String? portfolioUrl;
+  final String? locationText;
+  final String? currentEmployer;
+  final List<String> highlights;
+  final String? experienceLabel;
 
   const UserProfileModel({
     this.name,
@@ -14,6 +22,14 @@ class UserProfileModel {
     required this.experienceYears,
     required this.preferredLocations,
     this.minSalary,
+    this.phone,
+    this.linkedinUrl,
+    this.githubUrl,
+    this.portfolioUrl,
+    this.locationText,
+    this.currentEmployer,
+    this.highlights = const [],
+    this.experienceLabel,
   });
 
   /// Parses `GET /api/v1/users/me` (schema: `UserRead`).
@@ -27,6 +43,7 @@ class UserProfileModel {
       }
     }
     final locations = json['preferred_locations'];
+    final rawHighlights = json['highlights'];
     return UserProfileModel(
       name: json['name'] as String?,
       skills: skills,
@@ -35,6 +52,16 @@ class UserProfileModel {
           ? locations.whereType<String>().toList()
           : const <String>[],
       minSalary: json['min_salary'] as int?,
+      phone: json['phone'] as String?,
+      linkedinUrl: json['linkedin_url'] as String?,
+      githubUrl: json['github_url'] as String?,
+      portfolioUrl: json['portfolio_url'] as String?,
+      locationText: json['location_text'] as String?,
+      currentEmployer: json['current_employer'] as String?,
+      highlights: rawHighlights is List<dynamic>
+          ? rawHighlights.whereType<String>().toList()
+          : const <String>[],
+      experienceLabel: json['experience_label'] as String?,
     );
   }
 
@@ -47,6 +74,14 @@ class UserProfileModel {
         experienceYears: experienceYears,
         preferredLocations: preferredLocations,
         minSalary: minSalary,
+        phone: phone,
+        linkedinUrl: linkedinUrl,
+        githubUrl: githubUrl,
+        portfolioUrl: portfolioUrl,
+        locationText: locationText,
+        currentEmployer: currentEmployer,
+        highlights: highlights,
+        experienceLabel: experienceLabel,
       );
 
   factory UserProfileModel.fromEntity(UserProfile p) => UserProfileModel(
@@ -55,6 +90,14 @@ class UserProfileModel {
         experienceYears: p.experienceYears,
         preferredLocations: p.preferredLocations,
         minSalary: p.minSalary,
+        phone: p.phone,
+        linkedinUrl: p.linkedinUrl,
+        githubUrl: p.githubUrl,
+        portfolioUrl: p.portfolioUrl,
+        locationText: p.locationText,
+        currentEmployer: p.currentEmployer,
+        highlights: p.highlights,
+        experienceLabel: p.experienceLabel,
       );
 
   Map<String, dynamic> toJson() => {
@@ -63,5 +106,13 @@ class UserProfileModel {
         'experience_years': experienceYears,
         'preferred_locations': preferredLocations,
         if (minSalary != null) 'min_salary': minSalary,
+        if (phone != null) 'phone': phone,
+        if (linkedinUrl != null) 'linkedin_url': linkedinUrl,
+        if (githubUrl != null) 'github_url': githubUrl,
+        if (portfolioUrl != null) 'portfolio_url': portfolioUrl,
+        if (locationText != null) 'location_text': locationText,
+        if (currentEmployer != null) 'current_employer': currentEmployer,
+        if (highlights.isNotEmpty) 'highlights': highlights,
+        if (experienceLabel != null) 'experience_label': experienceLabel,
       };
 }

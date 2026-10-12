@@ -51,7 +51,7 @@ class JobFilter extends Equatable {
   /// What a Flutter developer in NCR would pick, used for a first run so the
   /// list is useful before the user touches the filter sheet.
   static const JobFilter flutterDefault = JobFilter(
-    technologies: {'flutter', 'dart'},
+    technologies: {'flutter'},
     locations: {JobLocations.delhiNcr},
     includeRemote: true,
   );

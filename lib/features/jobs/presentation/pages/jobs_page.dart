@@ -4,10 +4,12 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/loading_shimmer.dart';
+import '../../../onboarding/domain/entities/user_profile.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
 import '../../domain/entities/job.dart';
 import '../../domain/repositories/jobs_repository.dart';
 import '../bloc/jobs_bloc.dart';
+import '../widgets/cold_email_sheet.dart';
 import '../widgets/job_card.dart';
 import '../widgets/job_filter_sheet.dart';
 
@@ -36,6 +38,8 @@ class JobsPage extends StatelessWidget {
     // The user's own skills, so a posting can highlight what they already have.
     final userSkills =
         context.select<ProfileBloc, Set<String>>((b) => b.state.skillNames);
+    final userProfile =
+        context.select<ProfileBloc, UserProfile>((b) => b.state.profile);
 
     return Scaffold(
       appBar: AppBar(
@@ -134,6 +138,14 @@ class JobsPage extends StatelessWidget {
                         job: job,
                         userSkills: userSkills,
                         onTap: () => _openPosting(context, job),
+                        onEmailTap: () => ColdEmailSheet.show(
+                          context,
+                          companyId: job.companyId,
+                          companyName: job.company.name,
+                          jobId: job.id,
+                          jobTitle: job.title,
+                          profile: userProfile,
+                        ),
                       );
                     },
                   ),

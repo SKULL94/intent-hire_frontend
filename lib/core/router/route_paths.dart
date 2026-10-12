@@ -10,6 +10,7 @@ class RoutePaths {
   static const String jobs = '/jobs';
   static const String profile = '/profile';
   static const String editSkills = '/profile/edit-skills';
+  static const String editBio = '/profile/edit-bio';
 
   static const String company = '/company';
   static String companyDetail(String id) => '/company/$id';

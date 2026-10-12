@@ -15,6 +15,7 @@ class MatchCard extends StatelessWidget {
 
   final VoidCallback? onTap;
   final VoidCallback? onSave;
+  final VoidCallback? onEmailTap;
 
   const MatchCard({
     super.key,
@@ -22,12 +23,14 @@ class MatchCard extends StatelessWidget {
     this.userSkills = const {},
     this.onTap,
     this.onSave,
+    this.onEmailTap,
   });
 
   /// Overlapping technologies first (those are the reason this is a match),
   /// then the strongest remaining ones to fill out the picture.
   List<(String, double)> _chipsToShow() {
-    final ranked = match.company.rankedStack;
+    final ranked = match.company.rankedStack
+        .where((t) => t.$1.toLowerCase() != 'dart');
     final overlap = ranked.where((t) => userSkills.contains(t.$1.toLowerCase()));
     final rest = ranked.where((t) => !userSkills.contains(t.$1.toLowerCase()));
     return [...overlap, ...rest].take(6).toList();
@@ -140,21 +143,36 @@ class MatchCard extends StatelessWidget {
                     ],
                   ),
                 ),
-              if (onSave != null)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton.icon(
-                    onPressed: onSave,
-                    icon: Icon(
-                      match.status == MatchStatus.saved
-                          ? Icons.bookmark
-                          : Icons.bookmark_border,
-                      size: 18,
-                    ),
-                    label: Text(
-                      match.status == MatchStatus.saved ? 'Saved' : 'Save',
-                    ),
-                  ),
+              if (onSave != null || onEmailTap != null)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (onEmailTap != null)
+                      TextButton.icon(
+                        onPressed: onEmailTap,
+                        icon: const Icon(Icons.email_outlined, size: 16),
+                        label: const Text('Cold email'),
+                        style: TextButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ),
+                    if (onSave != null)
+                      TextButton.icon(
+                        onPressed: onSave,
+                        icon: Icon(
+                          match.status == MatchStatus.saved
+                              ? Icons.bookmark
+                              : Icons.bookmark_border,
+                          size: 18,
+                        ),
+                        label: Text(
+                          match.status == MatchStatus.saved ? 'Saved' : 'Save',
+                        ),
+                        style: TextButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ),
+                  ],
                 ),
             ],
           ),

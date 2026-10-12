@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/route_paths.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/loading_shimmer.dart';
+import '../../../jobs/presentation/widgets/cold_email_sheet.dart';
+import '../../../onboarding/domain/entities/user_profile.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
 import '../../domain/entities/match.dart';
 import '../bloc/matches_bloc.dart';
@@ -20,6 +22,8 @@ class MatchesPage extends StatelessWidget {
     // cards can highlight the technologies they have in common with a company.
     final userSkills =
         context.select<ProfileBloc, Set<String>>((b) => b.state.skillNames);
+    final userProfile =
+        context.select<ProfileBloc, UserProfile>((b) => b.state.profile);
 
     return Scaffold(
       appBar: AppBar(
@@ -116,6 +120,12 @@ class MatchesPage extends StatelessWidget {
                                 : MatchStatus.saved,
                           ),
                         ),
+                    onEmailTap: () => ColdEmailSheet.show(
+                      context,
+                      companyId: match.companyId,
+                      companyName: match.company.name,
+                      profile: userProfile,
+                    ),
                   ),
                 );
               },
