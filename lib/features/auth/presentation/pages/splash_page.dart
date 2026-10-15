@@ -25,7 +25,7 @@ class _SplashPageState extends State<SplashPage> {
       listenWhen: (prev, curr) => prev.status != curr.status,
       listener: (context, state) {
         if (state.status == AuthStatus.authenticated) {
-          context.go(RoutePaths.matches);
+          context.go(RoutePaths.companies);
         } else if (state.status == AuthStatus.unauthenticated) {
           context.go(RoutePaths.login);
         }

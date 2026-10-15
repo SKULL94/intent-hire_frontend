@@ -12,10 +12,9 @@ class AppConstants {
 
   static const String oauthRedirect = 'io.hiresignal.app://callback';
 
-  static const double highScoreThreshold = 70.0;
-  static const double medScoreThreshold = 40.0;
-
-  static const int matchesPageSize = 20;
+  /// Companies per page. The whole registry is a few hundred rows, so this is
+  /// about scroll smoothness rather than protecting the server.
+  static const int pageSize = 30;
 
   static const Duration httpTimeout = Duration(seconds: 20);
 }

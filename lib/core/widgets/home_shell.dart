@@ -7,42 +7,23 @@ class HomeShell extends StatelessWidget {
   final Widget child;
   const HomeShell({super.key, required this.child});
 
-  int _indexFromLocation(String location) {
-    if (location.startsWith(RoutePaths.jobs)) return 1;
-    if (location.startsWith(RoutePaths.profile)) return 2;
-    return 0;
-  }
-
-  void _onTap(BuildContext context, int index) {
-    switch (index) {
-      case 0:
-        context.go(RoutePaths.matches);
-      case 1:
-        context.go(RoutePaths.jobs);
-      case 2:
-        context.go(RoutePaths.profile);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
-    final index = _indexFromLocation(location);
+    final index = location.startsWith(RoutePaths.profile) ? 1 : 0;
+
     return Scaffold(
       body: child,
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
-        onDestinationSelected: (i) => _onTap(context, i),
+        onDestinationSelected: (i) => context.go(
+          i == 0 ? RoutePaths.companies : RoutePaths.profile,
+        ),
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.inbox_outlined),
-            selectedIcon: Icon(Icons.inbox),
-            label: 'Matches',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.work_outline),
-            selectedIcon: Icon(Icons.work),
-            label: 'Jobs',
+            icon: Icon(Icons.domain_outlined),
+            selectedIcon: Icon(Icons.domain),
+            label: 'Companies',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),

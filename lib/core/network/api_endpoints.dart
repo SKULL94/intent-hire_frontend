@@ -3,21 +3,13 @@ class ApiEndpoints {
 
   static const String health = '/health';
 
-  static const String usersProfile = '/api/v1/users/profile';
-  static const String usersMe = '/api/v1/users/me';
-
+  /// The product. Query parameters are the three switches:
+  /// `flutter_only`, `ncr_or_remote`, `hiring_soon`, plus `limit`/`offset`.
   static const String companies = '/api/v1/companies';
+
+  /// Same row, plus the evidence (`stack_signals`) and hiring signals
+  /// (`intent_signals`) behind it.
   static String companyById(String id) => '/api/v1/companies/$id';
-  static String companySignals(String id) => '/api/v1/companies/$id/signals';
 
-  // Job-level search. Unlike /matches this is not per-user: it filters
-  // postings directly, which is the only way to ask about one technology in
-  // one city.
-  static const String jobs = '/api/v1/jobs';
-  static const String jobFacets = '/api/v1/jobs/facets';
-
-  static const String matches = '/api/v1/matches';
-  static const String matchesRefresh = '/api/v1/matches/refresh';
-  // PATCH only — backend has no GET for a single match.
-  static String patchMatchById(String id) => '/api/v1/matches/$id';
+  static const String usersMe = '/api/v1/users/me';
 }

@@ -5,20 +5,16 @@ import 'core/di/injection.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
-import 'features/onboarding/presentation/bloc/onboarding_bloc.dart';
 
 class HireSignalApp extends StatelessWidget {
   const HireSignalApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider<AuthBloc>(
-          create: (_) => getIt<AuthBloc>()..add(const AuthStarted()),
-        ),
-        BlocProvider<OnboardingBloc>(create: (_) => getIt<OnboardingBloc>()),
-      ],
+    // Auth is the only app-wide bloc. The companies list is held by AppRouter
+    // so it survives tab switches, and the detail bloc is per-route.
+    return BlocProvider<AuthBloc>(
+      create: (_) => getIt<AuthBloc>()..add(const AuthStarted()),
       child: MaterialApp.router(
         title: 'HireSignal',
         debugShowCheckedModeBanner: false,

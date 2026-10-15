@@ -52,7 +52,9 @@ class _SignupPageState extends State<SignupPage> {
           );
         }
         if (state.status == AuthStatus.authenticated) {
-          context.go(RoutePaths.skillSetup);
+          // No onboarding step: the app answers one fixed question, so there
+          // is nothing to configure before the list is useful.
+          context.go(RoutePaths.companies);
         }
       },
       child: Scaffold(

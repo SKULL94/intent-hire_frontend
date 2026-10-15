@@ -10,15 +10,10 @@ import '../widgets/home_shell.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/signup_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
-import '../../features/company_detail/presentation/bloc/company_detail_bloc.dart';
-import '../../features/company_detail/presentation/pages/company_detail_page.dart';
-import '../../features/jobs/presentation/bloc/jobs_bloc.dart';
-import '../../features/jobs/presentation/pages/jobs_page.dart';
-import '../../features/matches/presentation/bloc/matches_bloc.dart';
-import '../../features/matches/presentation/pages/matches_page.dart';
-import '../../features/onboarding/presentation/pages/skill_setup_page.dart';
-import '../../features/profile/presentation/bloc/profile_bloc.dart';
-import '../../features/profile/presentation/pages/edit_skills_page.dart';
+import '../../features/companies/presentation/bloc/companies_bloc.dart';
+import '../../features/companies/presentation/bloc/company_detail_bloc.dart';
+import '../../features/companies/presentation/pages/companies_page.dart';
+import '../../features/companies/presentation/pages/company_detail_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import 'route_paths.dart';
 
@@ -27,11 +22,10 @@ class AppRouter {
 
   AppRouter(this._supabase);
 
-  /// `ProfileBloc` is created once and shared across the authenticated routes:
-  /// the profile tab edits it, and the matches list reads the user's skills
-  /// from it to highlight overlapping technologies.
-  late final ProfileBloc _profileBloc = getIt<ProfileBloc>()
-    ..add(const ProfileRequested());
+  /// Held for the app's lifetime so switching to Profile and back does not
+  /// refetch the list or lose the user's place in it.
+  late final CompaniesBloc _companiesBloc = getIt<CompaniesBloc>()
+    ..add(const CompaniesRequested());
 
   late final GoRouter router = GoRouter(
     initialLocation: RoutePaths.splash,
@@ -50,29 +44,14 @@ class AppRouter {
         path: RoutePaths.signup,
         builder: (_, __) => const SignupPage(),
       ),
-      GoRoute(
-        path: RoutePaths.skillSetup,
-        builder: (_, __) => const SkillSetupPage(),
-      ),
       ShellRoute(
-        builder: (_, __, child) => BlocProvider<ProfileBloc>.value(
-          value: _profileBloc,
-          child: HomeShell(child: child),
-        ),
+        builder: (_, __, child) => HomeShell(child: child),
         routes: [
           GoRoute(
-            path: RoutePaths.matches,
-            builder: (_, __) => BlocProvider<MatchesBloc>(
-              create: (_) =>
-                  getIt<MatchesBloc>()..add(const MatchesRequested()),
-              child: const MatchesPage(),
-            ),
-          ),
-          GoRoute(
-            path: RoutePaths.jobs,
-            builder: (_, __) => BlocProvider<JobsBloc>(
-              create: (_) => getIt<JobsBloc>()..add(const JobsRequested()),
-              child: const JobsPage(),
+            path: RoutePaths.companies,
+            builder: (_, __) => BlocProvider<CompaniesBloc>.value(
+              value: _companiesBloc,
+              child: const CompaniesPage(),
             ),
           ),
           GoRoute(
@@ -81,27 +60,14 @@ class AppRouter {
           ),
         ],
       ),
-      // Pushed over the shell, so these keep their own Scaffold and back button
-      // but still need ProfileBloc for the user's skills.
-      GoRoute(
-        path: RoutePaths.editSkills,
-        builder: (_, __) => BlocProvider<ProfileBloc>.value(
-          value: _profileBloc,
-          child: const EditSkillsPage(),
-        ),
-      ),
+      // Pushed over the shell, so it keeps its own Scaffold and back button.
       GoRoute(
         path: '${RoutePaths.company}/:id',
         builder: (_, state) {
           final id = state.pathParameters['id']!;
-          return MultiBlocProvider(
-            providers: [
-              BlocProvider<ProfileBloc>.value(value: _profileBloc),
-              BlocProvider<CompanyDetailBloc>(
-                create: (_) => getIt<CompanyDetailBloc>()
-                  ..add(CompanyDetailRequested(id)),
-              ),
-            ],
+          return BlocProvider<CompanyDetailBloc>(
+            create: (_) =>
+                getIt<CompanyDetailBloc>()..add(CompanyDetailRequested(id)),
             child: CompanyDetailPage(companyId: id),
           );
         },
@@ -113,15 +79,15 @@ class AppRouter {
     final loggedIn = _supabase.auth.currentUser != null;
     final location = state.matchedLocation;
 
-    final isAuthRoute = location == RoutePaths.login ||
-        location == RoutePaths.signup;
+    final isAuthRoute =
+        location == RoutePaths.login || location == RoutePaths.signup;
     final isSplash = location == RoutePaths.splash;
 
     if (!loggedIn && !isAuthRoute && !isSplash) {
       return RoutePaths.login;
     }
     if (loggedIn && (isAuthRoute || isSplash)) {
-      return RoutePaths.matches;
+      return RoutePaths.companies;
     }
     return null;
   }
